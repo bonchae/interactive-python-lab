@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Python Bootcamp Lab - Complete Edition</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            background: rgba(255,255,255,0.1);
+            padding: 40px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .header h1 { font-size: 3em; margin-bottom: 15px; }
+        .header p { font-size: 1.2em; margin-bottom: 20px; }
+        .lab-navigation {
+            background: rgba(255,255,255,0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .nav-button {
+            background: rgba(255,255,255,0.3);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .nav-button:hover, .nav-button.active {
+            background: rgba(255,255,255,0.5);
+            transform: translateY(-2px);
+        }
+        .section {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: none;
+        }
+        .section.active { display: block; }
+        .section h2 {
+            color: #667eea;
+            font-size: 2.2em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .section h3 {
+            color: #764ba2;
+            font-size: 1.6em;
+            margin: 25px 0 15px 0;
+        }
+        .exercise {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 25px 0;
+            border-left: 5px solid #667eea;
+        }
+        .exercise-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        .code-editor {
+            height: 250px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 8px 5px;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn.hint { background: #ff9800; }
+        .btn.run { background: #4CAF50; }
+        .output {
+            background: #1e1e1e;
+            color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            min-height: 60px;
+            white-space: pre-wrap;
+            font-size: 14px;
+        }
+        .feedback {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .feedback.hint {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .score-display {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 25px 0;
+            font-size: 1.4em;
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+        }
+        .progress-bar {
+            background: rgba(255,255,255,0.3);
+            height: 10px;
+            border-radius: 5px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: #fff;
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .data-table th, .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .data-table th {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+        .concept-box {
+            background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #2196f3;
+        }
+        .important-note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        .quiz-question {
+            background: #e8f4fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #2196f3;
+        }
+        .quiz-options {
+            margin: 15px 0;
+        }
+        .quiz-option {
+            display: block;
+            margin: 10px 0;
+            padding: 12px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .quiz-option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        .quiz-option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        .image-container {
+            text-align: center;
+            margin: 25px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .video-container {
+            text-align: center;
+            margin: 25px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .markdown-demo {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #28a745;
+        }
+        .completion-badge {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            display: inline-block;
+            margin: 10px 5px;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .list-visualization {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .list-box {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            margin: 5px;
+            border-radius: 8px;
+            min-width: 80px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .list-index {
+            font-size: 12px;
+            color: #999;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐍 Python Bootcamp Lab</h1>
+            <p>Complete Interactive Python Tutorial with Data Analysis</p>
+            <p style="font-size: 1em; margin-top: 10px;">Based on popular Python packages for Data Analysis:<br>
+            <strong>Numpy & Scipy</strong> • <strong>Pandas</strong> • <strong>Matplotlib</strong> • <strong>Seaborn</strong> • <strong>Scikit-learn</strong> • <strong>StatsModels</strong></p>
+        </div>
+        
+        <div class="lab-navigation">
+            <button class="nav-button active" onclick="showSection('imports')">1. Import Packages</button>
+            <button class="nav-button" onclick="showSection('data-io')">2. Read & Write Data</button>
+            <button class="nav-button" onclick="showSection('data-understanding')">3. Data Understanding</button>
+            <button class="nav-button" onclick="showSection('data-filtering')">4. Data Filtering</button>
+            <button class="nav-button" onclick="showSection('lists-loops')">5. Lists & Loops</button>
+            <button class="nav-button" onclick="showSection('markdown')">6. Markdown & Media</button>
+            <button class="nav-button" onclick="showSection('completion')">7. Completion</button>
+        </div>
+        
+        <div class="score-display">
+            <div>Total Progress: <span id="totalScore">0</span> / 100 points</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div style="font-size: 0.9em; margin-top: 10px;">
+                Completed: <span id="completedCount">0</span> / <span id="totalExercises">12</span> exercises
+            </div>
+        </div>
+
+        <!-- Section 1: Import Python Packages -->
+        <div id="imports" class="section active">
+            <h2>📚 Section 1: Import Python Packages</h2>
+            
+            <div class="concept-box">
+                <h3>Popular Python Packages for Data Analysis</h3>
+                <ul>
+                    <li><strong>Numpy and Scipy</strong> — fundamental scientific computing</li>
+                    <li><strong>Pandas</strong> — data manipulation and analysis</li>
+                    <li><strong>Matplotlib</strong> — plotting and visualization</li>
+                    <li><strong>Seaborn</strong> — data visualization</li>
+                    <li><strong>Scikit-learn</strong> — machine learning and data mining</li>
+                    <li><strong>StatsModels</strong> — statistical modeling, testing, and analysis</li>
+                </ul>
+                <p><strong>Pandas</strong> is a popular Python package for reading and processing data. You can import files in CSV, Excel, and many other formats.</p>
+            </div>
+
+            <div class="exercise">
+                <div class="exercise-title">💻 Exercise 1.1: Import Pandas (8 points)</div>
+                <p>Write the code to import pandas with the alias 'pd':</p>
+                <div id="editor1_1" class="code-editor"></div>
+                <button class="btn run" onclick="runCode('1_1')">▶️ Run Code</button>
+                <button class="btn hint" onclick="showHint('1_1')">💡 Hint</button>
+                <div id="output1_1" class="output">Click "Run Code" to test your solution...</div>
+                <div id="feedback1_1" class="feedback" style="display:none;"></div>
+            </div>
+
+            <div class="quiz-question">
+                <h3>🤔 Knowledge Check: Why do we use 'as pd'?</h3>
+                <div class="quiz-options" data-question="q1">
+                    <label class="quiz-option">
+                        <input type="radio" name="q1" value="shorter"> To make the code shorter and easier to type
+                    </label>
+                    <label class="quiz-option">
+                        <input type="radio" name="q1" value="required"> It's required by Python
+                    </label>
+                    <label class="quiz-option">
+                        <input type="radio" name="q1" value="faster"> It makes the code run faster
+                    </label>
+                    <label class="quiz-option">
+                        <input type="radio" name="q1" value="memory"> It uses less memory
+                    </label>
+                </div>
+                <button class="btn" onclick="checkQuiz('q1', 'shorter', 5)">Submit Answer</button>
+                <div id="feedbackq1" class="feedback" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- Section 2: Read & Write Data File -->
+        <div id="data-io" class="section">
+            <h2>📁 Section 2: Read & Write Data File</h2>
+            
+            <h3>Sales Data</h3>
+            <div class="important-note">
+                <strong>Important:</strong> We NEVER print the entire output. ALWAYS use 'head()' instead.
+                <br>Use <code>sales.head()</code>, not <code>sales</code>, to inspect your data.
+            </div>
+
+            <div class="exercise">
+                <div class="exercise-title">💻 Exercise 2.1: Read CSV File (10 points)</div>
+                <p>Read the CSV file 'sales.csv' and display the first 5 rows:</p>
+                <div id="editor2_1" class="code-editor"></div>
+                <button class="btn run" onclick="runCode('2_1')">▶️ Run Code</button>
+                <button class="btn hint" onclick="showHint('2_1')">💡 Hint</button>
+                <div id="output2_1" class="output">Click "Run Code" to test your solution...</div>
+                <div id="feedback2_1" class="feedback" style="display:none;"></div>
+            </div>
+
+            <div class="exercise">
+                <div class="exercise-title">💻 Exercise 2.2: View First 2 Rows (5 points)</div>
+                <p>Display only the first 2 rows of the sales data:</p>
+                <div id="editor2_2" class="code-editor"></div>
+                <button class="btn run" onclick="runCode('2_2')">▶️ Run Code</button>
+                <button class="btn hint" onclick="showHint('2_2')">💡 Hint</button>
+                <div id="output2_2" class="output">Click "Run Code" to test your solution...</div>
+                <div id="feedback2_2" class="feedback" style="display:none;"></div>
+            </div>
+
+            <div class="exercise">
+                <div class="exercise-title">💻 Exercise 2.3: Create Subset and Save (8 points)</div>
+                <p>Select only 'Order ID' and 'Order Quantity' columns, assign to sales_subset, and save as CSV:</p>
+                <div id="editor2_3" class="code-editor"></div>
+                <button class="btn run" onclick="runCode('2_3')">▶️ Run Code</button>
+                <button class="btn hint" onclick="showHint('2_3')">💡 Hint</button>
+                <div id="output2_3" class="output">Click "Run Code" to test your solution...</div>
+                <div id="feedback2_3" class="feedback" style="display:none;"></div>
+            </div>
+
+            <h3>Tips Data</h3>
+            
+            <div class="exercise">
+                <div class="exercise-title">💻 Exercise 2.4: Read Tips Data (10 points)</div>
+                <p>Read the CSV file 'tips.csv', assign to variable 'tips', and show first 5 rows:</p>
+                <div id="editor2_4" class="code-editor"></div>
+                <button class="btn run" onclick="runCode('2_4')">▶️ Run Code</button>
+                <button class="btn hint" onclick="showHint('2_4')">💡 Hint</button>
+                <div id="output2_4" class="output">Click "Run Code" to test your solution...</div>
+                <div id="feedback2_4" class="feedback" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- Section 3: Data Understanding -->
+        <div id="data-understanding" class="section">
+            <h2>🔍 Section 3: Data Understanding</h2>
+            
+            <h3>Sales Data Analysis</h3>
+
+            <div class="exercise">
+                <div class="exercise-title">💻 Exercise 3.1: Column Names (5 points)</div>
+                <p>Print the column names of the sales dataset:</p>
+                <div id="editor3_1" class="code-editor"></div>
+                <button class="btn run" onclick="runCode('3_1')">▶️ Run Code</button>
+                <button class="btn hint" onclick="showHint('3_1')">💡 Hint</button>
+                <div id="output3_1" class="output">Click "Run Code" to test your solution...</div>
+                <div id="feedback3_1" class="feedback" style="display:none;"></div>
+            </div>
+
+            <div class="exercise">
+                <div class="exercise-title">💻 Exercise 3.2: Basic Statistics (8 points)</div>
+                <p>Find basic statistics for the sales dataset:</p>
+                <div id="editor3_2" class="code-editor"></div>
+                <button class="btn run" onclick="runCode('3_2')">▶️ Run Code</button>
+                <button class="btn hint" onclick="showHint('3_2')">💡 Hint</button>
+                <div id="output3_2" class="output">Click "Run Code" to test your solution...</div>
+                <div id="feedback3_2" class="feedback" style="display:none;"></div>
+            </div>
+
+            <div class="exercise">
+                <div class="exercise-title">💻 Exercise 3.3: Calculate Averages (7 points)</div>
+                <p>Calculate the average (mean) and median of 'Order Quantity':</p>
+                <div id="editor3_3" class="code-editor"></div>
+                <button class="btn run" onclick="runCode('3_3')">▶️ Run Code</button>
+                <button class="btn hint" onclick="showHint('3_3')">💡 Hint</button>
+                <div id="output3_3" class="output">Click "Run Code" to test your solution...</div>
+                <div id="feedback3_3" class="feedback" style="display:none;"></div>
+            </div>
+
+            <div class="exercise">
+                <div class="exercise-title">💻 Exercise 3.4: Dataset Shape (5 points)</div>
+                <p>Find out how many rows and columns are in the sales data:</p>
+                <div id="editor3_4" class="code-editor"></div>
+                <button class="btn run" onclick="runCode('3_4')">▶️ Run Code</button>
+                <button class="btn hint" onclick="showHint('3_4')">💡 Hint</button>
+                <div id="output3_4" class="output">Click "Run Code" to test your solution...</div>
+                <div id="feedback3_4" class="feedback" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- Section 4: Data Filtering -->
+        <div id="data-filtering" class="section">
+            <h2>🎯 Section 4: Selecting Rows (Writing Queries)</h2>
+            
+            <h3>Sales Data Filtering</h3>
+
+            <div class="exercise">
+                <div class="exercise-title">💻 Exercise 4.1: Filter by Region (10 points)</div>
+                <p>Select all rows where Region equals "East" and show first 5 rows:</p>
+                <div id="editor4_1" class="code-editor"></div>
+                <button class="btn run" onclick="runCode('4_1')">▶️ Run Code</button>
+                <button class="btn hint" onclick="showHint('4_1')">💡 Hint</button>
+                <div id="output4_1" class="output">Click "Run Code" to test your solution...</div>
+                <div id="feedback4_1" class="feedback" style="display:none;"></div>
+            </div>
+
+            <div class="exercise">
+                <div class="exercise-title">💻 Exercise 4.2: Count Orders (5 points)</div>
+                <p>Count how many orders are from the East region:</p>
+                <div id="editor4_2" class="code-editor"></div>
+                <button class="btn run" onclick="runCode('4_2')">▶️ Run Code</button>
+                <button class="btn hint" onclick="showHint('4_2')">💡 Hint</button>
+                <div id="output4_2" class="output">Click "Run Code" to test your solution...</div>
+                <div id="feedback4_2" class="feedback" style="display:none;"></div>
+            </div>
+
+            <div class="exercise">
+                <div class="exercise-title">💻 Exercise 4.3: Sort by Sales (7 points)</div>
+                <p>Show the top 5 orders with highest Sales (sort descending):</p>
+                <div id="editor4_3" class="code-editor"></div>
+                <button class="btn run" onclick="runCode('4_3')">▶️ Run Code</button>
+                <button class="btn hint" onclick="showHint('4_3')">💡 Hint</button>
+                <div id="output4_3" class="output">Click "Run Code" to test your solution...</div>
+                <div id="feedback4_3" class="feedback" style="display:none;"></div>
+            </div>
+
+            <div class="quiz-question">
+                <h3>🤔 Knowledge Check: Filtering Data</h3>
+                <p>Which operator is used for filtering rows based on conditions in pandas?</p>
+                <div class="quiz-options" data-question="q2">
+                    <label class="quiz-option">
+                        <input type="radio" name="q2" value="equals"> ==
+                    </label>
+                    <label class="quiz-option">
+                        <input type="radio" name="q2" value="assign"> =
+                    </label>
+                    <label class="quiz-option">
+                        <input type="radio" name="q2" value="filter"> .filter()
+                    </label>
+                    <label class="quiz-option">
+                        <input type="radio" name="q2" value="where"> .where()
+                    </label>
+                </div>
+                <button class="btn" onclick="checkQuiz('q2', 'equals', 3)">Submit Answer</button>
+                <div id="feedbackq2" class="feedback" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- Section 5: Lists & Loops -->
+        <div id="lists-loops" class="section">
+            <h2>📝 Section 5: List & Looping Statement</h2>
+            
+            <div class="concept-box">
+                <h3>Understanding Lists</h3>
+                <p>Data can be processed using different data structures:</p>
+                <ul>
+                    <li><strong>Dataframe</strong> (like Excel) using Pandas</li>
+                    <li><strong>List</strong> - what we'll focus on here</li>
+                    <li>And many others...</li>
+                </ul>
+                
+                <p>Each value is assigned an <strong>index</strong> or <strong>position</strong> (like an address). 
+                <strong>The first index is zero; the second index is one.</strong></p>
+                
+                <div class="list-visualization">
+                    <h4>List Visualization: ['life', 42, 'the universe', 6, 'and', 9]</h4>
+                    <div style="margin: 20px 0;">
+                        <div class="list-box">
+                            'life'
+                            <span class="list-index">index: 0</span>
+                        </div>
+                        <div class="list-box">
+                            42
+                            <span class="list-index">index: 1</span>
+                        </div>
+                        <div class="list-box">
+                            'the universe'
+                            <span class="list-index">index: 2</span>
+                        </div>
+                        <div class="list-box">
+                            6
+                            <span class="list-index">index: 3</span>
+                        </div>
+                        <div class="list-box">
+                            'and'
+                            <span class="list-index">index: 4</span>
+                        </div>
+                        <div class="list-box">
+                            9
+                            <span class="list-index">index: 5</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="exercise">
+                <div class="exercise-title">💻 Exercise 5.1: Create and Access Lists (8 points)</div>
+                <p>Create the list ['life', 42, 'the universe', 6, 'and', 9] and print specific elements:</p>
+                <div id="editor5_1" class="code-editor"></div>
+                <button class="btn run" onclick="runCode('5_1')">▶️ Run Code</button>
+                <button class="btn hint" onclick="showHint('5_1')">💡 Hint</button>
+                <div id="output5_1" class="output">Click "Run Code" to test your solution...</div>
+                <div id="feedback5_1" class="feedback" style="display:none;"></div>
+            </div>
+
+            <div class="exercise">
+                <div class="exercise-title">💻 Exercise 5.2: For Loop with Lists (7 points)</div>
+                <p>Create your own list with at least 4 different items and use a for loop to print each item:</p>
+                <div id="editor5_2" class="code-editor"></div>
+                <button class="btn run" onclick="runCode('5_2')">▶️ Run Code</button>
+                <button class="btn hint" onclick="showHint('5_2')">💡 Hint</button>
+                <div id="output5_2" class="output">Click "Run Code" to test your solution...</div>
+                <div id="feedback5_2" class="feedback" style="display:none;"></div>
+            </div>
+
+            <div class="exercise">
+                <div class="exercise-title">💻 Exercise 5.3: Convert DataFrame to List (5 points)</div>
+                <p>Convert the sales dataframe to a list and show the first row:</p>
+                <div id="editor5_3" class="code-editor"></div>
+                <button class="btn run" onclick="runCode('5_3')">▶️ Run Code</button>
+                <button class="btn hint" onclick="showHint('5_3')">💡 Hint</button>
+                <div id="output5_3" class="output">Click "Run Code" to test your solution...</div>
+                <div id="feedback5_3" class="feedback" style="display:none;"></div>
+            </div>
+
+            <div class="quiz-question">
+                <h3>🤔 Knowledge Check: List Indexing</h3>
+                <p>What is the index of the first item in a Python list?</p>
+                <div class="quiz-options" data-question="q3">
+                    <label class="quiz-option">
+                        <input type="radio" name="q3" value="zero"> 0
+                    </label>
+                    <label class="quiz-option">
+                        <input type="radio" name="q3" value="one"> 1
+                    </label>
+                    <label class="quiz-option">
+                        <input type="radio" name="q3" value="negative"> -1
+                    </label>
+                    <label class="quiz-option">
+                        <input type="radio" name="q3" value="undefined"> undefined
+                    </label>
+                </div>
+                <button class="btn" onclick="checkQuiz('q3', 'zero', 3)">Submit Answer</button>
+                <div id="feedbackq3" class="feedback" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- Section 6: Markdown & Media -->
+        <div id="markdown" class="section">
+            <h2>📝 Section 6: Markdown for Effective Reporting</h2>
+            
+            <div class="concept-box">
+                <h3>Using Markdown Effectively</h3>
+                <p>Jupyter notebooks are like web pages, so you can use Markdown effectively for presenting your codes, results, and data visualization. 
+                This makes your work professional and easy to read!</p>
+            </div>
+
+            <div class="markdown-demo">
+                <h3>Markdown Examples</h3>
+                <h4># Section Headings</h4>
+                <p><strong>Bold text</strong> with **asterisks** or __underscores__</p>
+                <p><em>Italic text</em> with *single asterisks* or _underscores_</p>
+                
+                <h4>Bulleted Lists:</h4>
+                <ul>
+                    <li>Bullet 1</li>
+                    <li>Bullet 2
+                        <ul>
+                            <li>Bullet 2a</li>
+                            <li>Bullet 2b</li>
+                        </ul>
+                    </li>
+                    <li>Bullet 3</li>
+                </ul>
+                
+                <h4>Numbered Lists:</h4>
+                <ol>
+                    <li>First item</li>
+                    <li>Second item</li>
+                    <li>Third item</li>
+                </ol>
+            </div>
+
+            <h3>Including Images and Videos</h3>
+            
+            <div class="image-container">
+                <h4>📊 Sample Data Science Image</h4>
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmNGZmIi8+CiAgPHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzY2N2VlYSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkRhdGEgU2NpZW5jZSBJbWFnZSBQbGFjZWhvbGRlcjwvdGV4dD4KICA8Y2lyY2xlIGN4PSIxMDAiIGN5PSIxMDAiIHI9IjMwIiBmaWxsPSIjNjY3ZWVhIiBvcGFjaXR5PSIwLjciLz4KICA8Y2lyY2xlIGN4PSIzMDAiIGN5PSIyMDAiIHI9IjI1IiBmaWxsPSIjNzY0YmEyIiBvcGFjaXR5PSIwLjciLz4KICA8cmVjdCB4PSIyMDAiIHk9IjUwIiB3aWR0aD0iNDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjNGNhZjUwIiBvcGFjaXR5PSIwLjciLz4KPC9zdmc+" alt="Data Science Visualization" style="max-width: 100%; height: auto; border-radius: 8px;"/>
+                <p><em>Example: Data visualization with charts and graphs</em></p>
+            </div>
+
+            <div class="video-container">
+                <h4>🎥 Educational Video Integration</h4>
+                <div style="background: #1e1e1e; color: white; padding: 40px; border-radius: 8px; text-align: center;">
+                    <h3>📺 YouTube Video Player</h3>
+                    <p>In Jupyter: YouTubeVideo('video_id')</p>
+                    <p style="margin-top: 20px; font-size: 14px; opacity: 0.8;">
+                        Videos can include tutorials on:<br>
+                        • Python programming basics<br>
+                        • Data science concepts<br>
+                        • Statistical analysis<br>
+                        • Machine learning fundamentals
+                    </p>
+                </div>
+            </div>
+
+            <div class="exercise">
+                <div class="exercise-title">💻 Exercise 6.1: Create Markdown Lists (5 points)</div>
+                <p>Create both a bulleted list and numbered list about your favorite Python features:</p>
+                <div id="editor6_1" class="code-editor"></div>
+                <button class="btn run" onclick="runCode('6_1')">▶️ Run Code</button>
+                <button class="btn hint" onclick="showHint('6_1')">💡 Hint</button>
+                <div id="output6_1" class="output">Click "Run Code" to test your solution...</div>
+                <div id="feedback6_1" class="feedback" style="display:none;"></div>
+            </div>
+
+            <div class="concept-box">
+                <h3>🎯 Best Practices for Lab Reports</h3>
+                <ul>
+                    <li><strong>Structure:</strong> Use clear headings and sections</li>
+                    <li><strong>Documentation:</strong> Explain your code with markdown cells</li>
+                    <li><strong>Visuals:</strong> Include charts, graphs, and images</li>
+                    <li><strong>References:</strong> Always cite your sources</li>
+                    <li><strong>Conclusions:</strong> Summarize your findings</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 7: Completion -->
+        <div id="completion" class="section">
+            <h2>🎉 Section 7: Lab Completion & Next Steps</h2>
+            
+            <div style="text-align: center; margin: 40px 0;">
+                <div id="completionStatus">
+                    <h3>Your Progress</h3>
+                    <div id="completionBadges"></div>
+                </div>
+            </div>
+
+            <div class="concept-box">
+                <h3>📚 References & Resources</h3>
+                <ul>
+                    <li><a href="https://pythonspot.com" target="_blank">Python Programming Tutorials</a></li>
+                    <li><a href="http://en.wikibooks.org/wiki/Non-Programmer%27s_Tutorial_for_Python_2.6/Lists" target="_blank">Python Lists Tutorial</a></li>
+                    <li><a href="http://nestacms.com/docs/creating-content/markdown-cheat-sheet" target="_blank">Markdown Cheat Sheet</a></li>
+                    <li><a href="https://pandas.pydata.org/docs/" target="_blank">Pandas Documentation</a></li>
+                    <li><a href="https://numpy.org/doc/" target="_blank">NumPy Documentation</a></li>
+                </ul>
+            </div>
+
+            <div class="important-note">
+                <h3>📥 For Lab/HW Submission</h3>
+                <ol>
+                    <li>Rename this notebook as <strong>Yourlastname_firstinitial_Lab_PythonBootCamp</strong></li>
+                    <li>Download this file as HTML (Go to <strong>File</strong> / <strong>Download as HTML</strong>)</li>
+                    <li>Submit it to Canvas</li>
+                </ol>
+            </div>
+
+            <div style="text-align: center; margin: 40px 0;">
+                <button class="btn" onclick="generateCertificate()" style="font-size: 18px; padding: 20px 40px; background: linear-gradient(45deg, #28a745, #20c997);">
+                    🏆 Generate Completion Certificate
+                </button>
+            </div>
+
+            <div id="certificateArea" style="display:none; margin-top: 30px;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let editors = {};
+        let totalScore = 0;
+        let maxScore = 100;
+        let completedExercises = [];
+        let currentSection = 'imports';
+
+        // Exercise configuration
+        const exercises = {
+            '1_1': { points: 8, section: 'imports' },
+            '2_1': { points: 10, section: 'data-io' },
+            '2_2': { points: 5, section: 'data-io' },
+            '2_3': { points: 8, section: 'data-io' },
+            '2_4': { points: 10, section: 'data-io' },
+            '3_1': { points: 5, section: 'data-understanding' },
+            '3_2': { points: 8, section: 'data-understanding' },
+            '3_3': { points: 7, section: 'data-understanding' },
+            '3_4': { points: 5, section: 'data-understanding' },
+            '4_1': { points: 10, section: 'data-filtering' },
+            '4_2': { points: 5, section: 'data-filtering' },
+            '4_3': { points: 7, section: 'data-filtering' },
+            '5_1': { points: 8, section: 'lists-loops' },
+            '5_2': { points: 7, section: 'lists-loops' },
+            '5_3': { points: 5, section: 'lists-loops' },
+            '6_1': { points: 5, section: 'markdown' }
+        };
+
+        // Load saved progress
+        const savedProgress = JSON.parse(localStorage.getItem('pythonBootcampProgress') || '{}');
+        totalScore = savedProgress.totalScore || 0;
+        completedExercises = savedProgress.completedExercises || [];
+
+        // Initialize Monaco Editor
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
+        require(['vs/editor/editor.main'], function () {
+            initializeEditors();
+            updateUI();
+            updateCompletionStatus();
+        });
+
+        function initializeEditors() {
+            Object.keys(exercises).forEach(exerciseId => {
+                const editorElement = document.getElementById(`editor${exerciseId}`);
+                if (editorElement) {
+                    editors[exerciseId] = monaco.editor.create(editorElement, {
+                        value: getInitialCode(exerciseId),
+                        language: 'python',
+                        theme: 'vs-light',
+                        minimap: { enabled: false },
+                        scrollBeyondLastLine: false,
+                        fontSize: 14,
+                        automaticLayout: true,
+                        wordWrap: 'on'
+                    });
+                    
+                    // Restore saved code
+                    if (savedProgress.exercises && savedProgress.exercises[exerciseId]) {
+                        editors[exerciseId].setValue(savedProgress.exercises[exerciseId].code);
+                    }
+                }
+            });
+        }
+
+        function getInitialCode(exerciseId) {
+            const codes = {
+                '1_1': '# Import pandas with alias pd\n',
+                '2_1': '# Read CSV file and display first 5 rows\n# sales = pd.read_csv("data/sales.csv")\n# sales.head()\n',
+                '2_2': '# View first 2 rows of sales data\n# sales.head(2)\n',
+                '2_3': '# Create subset with Order ID and Order Quantity columns\n# sales_subset = sales[["Order ID", "Order Quantity"]]\n# sales_subset.to_csv("data/sales_subset.csv")\n',
+                '2_4': '# Read tips.csv file\n# tips = pd.read_csv("data/tips.csv")\n# tips.head()\n',
+                '3_1': '# Print column names\n# sales.columns\n',
+                '3_2': '# Basic statistics\n# sales.describe()\n',
+                '3_3': '# Calculate mean and median of Order Quantity\n# sales["Order Quantity"].mean()\n# sales["Order Quantity"].median()\n',
+                '3_4': '# Show dataset shape (rows, columns)\n# sales.shape\n',
+                '4_1': '# Filter rows where Region equals "East"\n# sales.loc[sales["Region"] == "East"].head()\n',
+                '4_2': '# Count rows in East region\n# len(sales.loc[sales["Region"] == "East"])\n',
+                '4_3': '# Sort by Sales descending, show top 5\n# sales.sort_values("Sales", ascending=False).head()\n',
+                '5_1': '# Create list and access elements\n# items = ["life", 42, "the universe", 6, "and", 9]\n# print(items[0])  # first element\n# print(items[-1]) # last element\n',
+                '5_2': '# Create your own list and loop through it\n# my_list = ["item1", "item2", "item3", "item4"]\n# for item in my_list:\n#     print(item)\n',
+                '5_3': '# Convert dataframe to list\n# sales_list = sales.values.tolist()\n# sales_list[0]  # first row\n',
+                '6_1': '# Create markdown lists (use print statements to show the output)\nprint("## My Favorite Python Features")\nprint("### Bulleted List:")\nprint("* Easy to learn")\nprint("* Powerful libraries")\nprint("* Great community")\nprint("\\n### Numbered List:")\nprint("1. Data analysis with pandas")\nprint("2. Visualization with matplotlib")\nprint("3. Machine learning with scikit-learn")\n'
+            };
+            return codes[exerciseId] || '# Your code here\n';
+        }
+
+        function runCode(exerciseId) {
+            const code = editors[exerciseId].getValue();
+            const output = document.getElementById(`output${exerciseId}`);
+            const feedback = document.getElementById(`feedback${exerciseId}`);
+            
+            output.textContent = 'Executing code...';
+            
+            setTimeout(() => {
+                const result = executeCode(exerciseId, code);
+                output.textContent = result.output;
+                
+                if (result.correct) {
+                    feedback.className = 'feedback correct';
+                    feedback.textContent = `✅ ${result.message}`;
+                    feedback.style.display = 'block';
+                    
+                    if (!completedExercises.includes(exerciseId)) {
+                        addScore(exercises[exerciseId].points);
+                        completedExercises.push(exerciseId);
+                        saveProgress();
+                        updateCompletionStatus();
+                    }
+                } else {
+                    feedback.className = 'feedback incorrect';
+                    feedback.textContent = `❌ ${result.message}`;
+                    feedback.style.display = 'block';
+                }
+                
+                saveProgress();
+            }, 1000);
+        }
+
+        function executeCode(exerciseId, code) {
+            const lowerCode = code.toLowerCase().replace(/\s+/g, ' ');
+            
+            switch (exerciseId) {
+                case '1_1':
+                    if (code.includes('import pandas as pd')) {
+                        return {
+                            correct: true,
+                            output: 'Success! 🎉\n\nPandas imported successfully!\nYou can now use:\n- pd.read_csv() for reading CSV files\n- pd.DataFrame() for creating data frames\n- pd.read_excel() for Excel files\n- And many more pandas functions!',
+                            message: 'Perfect! Pandas imported with alias pd.'
+                        };
+                    }
+                    break;
+                    
+                case '2_1':
+                    if (lowerCode.includes('pd.read_csv') && lowerCode.includes('.head()') && lowerCode.includes('sales')) {
+                        return {
+                            correct: true,
+                            output: 'Success! 🎉\n\nCSV file loaded and displayed:\n\n   Order ID    Order Date    Region      Sales    Order Quantity\n0  CA-2016-152156  2016-11-08   South      261.96             2\n1  CA-2016-138688  2016-11-12   West       731.94             3\n2  US-2015-108966  2015-10-11   East        14.62             2\n3  US-2016-156909  2016-07-16   Central    957.58             5\n4  CA-2014-115812  2014-06-09   East        22.37             2',
+                            message: 'Excellent! You read the CSV file and displayed the first 5 rows.'
+                        };
+                    }
+                    break;
+                    
+                case '2_2':
+                    if (lowerCode.includes('.head(2)') || lowerCode.includes('.head( 2 )')) {
+                        return {
+                            correct: true,
+                            output: 'Success! 🎉\n\nFirst 2 rows displayed:\n\n   Order ID    Order Date    Region      Sales    Order Quantity\n0  CA-2016-152156  2016-11-08   South      261.96             2\n1  CA-2016-138688  2016-11-12   West       731.94             3',
+                            message: 'Perfect! You displayed exactly 2 rows using head(2).'
+                        };
+                    }
+                    break;
+                    
+                case '2_3':
+                    if (lowerCode.includes('sales_subset') && lowerCode.includes('[') && lowerCode.includes('order') && lowerCode.includes('to_csv')) {
+                        return {
+                            correct: true,
+                            output: 'Success! 🎉\n\nSubset created and saved:\n\n   Order ID    Order Quantity\n0  CA-2016-152156             2\n1  CA-2016-138688             3\n2  US-2015-108966             2\n3  US-2016-156909             5\n4  CA-2014-115812             2\n\nFile saved as: data/sales_subset.csv',
+                            message: 'Great! You created a subset and saved it to CSV.'
+                        };
+                    }
+                    break;
+                    
+                case '2_4':
+                    if (lowerCode.includes('tips') && lowerCode.includes('pd.read_csv') && lowerCode.includes('.head()')) {
+                        return {
+                            correct: true,
+                            output: 'Success! 🎉\n\nTips dataset loaded:\n\n   total_bill   tip     sex smoker  day    time  size\n0       16.99  1.01  Female     No  Sun  Dinner     2\n1       10.34  1.66    Male     No  Sun  Dinner     3\n2       21.01  3.50    Male     No  Sun  Dinner     3\n3       23.68  3.31    Male     No  Sun  Dinner     2\n4       24.59  3.61  Female     No  Sun  Dinner     4',
+                            message: 'Excellent! Tips dataset loaded successfully.'
+                        };
+                    }
+                    break;
+                    
+                case '3_1':
+                    if (lowerCode.includes('.columns') && lowerCode.includes('sales')) {
+                        return {
+                            correct: true,
+                            output: 'Success! 🎉\n\nColumn names:\nIndex([\'Order ID\', \'Order Date\', \'Region\', \'Sales\', \'Order Quantity\'], dtype=\'object\')',
+                            message: 'Perfect! You displayed the column names.'
+                        };
+                    }
+                    break;
+                    
+                case '3_2':
+                    if (lowerCode.includes('.describe()') && lowerCode.includes('sales')) {
+                        return {
+                            correct: true,
+                            output: 'Success! 🎉\n\nBasic Statistics:\n              Sales  Order Quantity\ncount      1000.000        1000.000\nmean        456.842           2.847\nstd         312.456           1.234\nmin          14.620           1.000\n25%         187.250           2.000\n50%         394.860           3.000\n75%         651.420           4.000\nmax         957.580           5.000',
+                            message: 'Great! You generated basic statistics for the dataset.'
+                        };
+                    }
+                    break;
+                    
+                case '3_3':
+                    if ((lowerCode.includes('.mean()') || lowerCode.includes('.median()')) && lowerCode.includes('order quantity')) {
+                        return {
+                            correct: true,
+                            output: 'Success! 🎉\n\nOrder Quantity Statistics:\nMean (Average): 2.847\nMedian: 3.0\n\nThe average order quantity is about 2.85 items.\nThe median shows that half of orders have 3 or fewer items.',
+                            message: 'Excellent! You calculated mean and median for Order Quantity.'
+                        };
+                    }
+                    break;
+                    
+                case '3_4':
+                    if (lowerCode.includes('.shape') && lowerCode.includes('sales')) {
+                        return {
+                            correct: true,
+                            output: 'Success! 🎉\n\nDataset Shape: (1000, 5)\n\nThis means:\n- 1000 rows (records/observations)\n- 5 columns (variables/features)',
+                            message: 'Perfect! You found the dataset dimensions.'
+                        };
+                    }
+                    break;
+                    
+                case '4_1':
+                    if (lowerCode.includes('.loc[') && lowerCode.includes('==') && lowerCode.includes('east') && lowerCode.includes('.head()')) {
+                        return {
+                            correct: true,
+                            output: 'Success! 🎉\n\nEast Region Orders (first 5):\n\n   Order ID    Order Date    Region      Sales    Order Quantity\n2  US-2015-108966  2015-10-11   East        14.62             2\n4  CA-2014-115812  2014-06-09   East        22.37             2\n7  US-2017-123456  2017-03-15   East       445.23             3\n12 CA-2016-987654  2016-09-22   East       332.18             4\n18 US-2015-567890  2015-12-05   East       189.45             1',
+                            message: 'Excellent! You filtered data for East region.'
+                        };
+                    }
+                    break;
+                    
+                case '4_2':
+                    if (lowerCode.includes('len(') && lowerCode.includes('east')) {
+                        return {
+                            correct: true,
+                            output: 'Success! 🎉\n\nNumber of orders from East region: 247\n\nThis represents about 24.7% of all orders in the dataset.',
+                            message: 'Great! You counted the East region orders.'
+                        };
+                    }
+                    break;
+                    
+                case '4_3':
+                    if (lowerCode.includes('.sort_values') && lowerCode.includes('ascending=false') && lowerCode.includes('.head()')) {
+                        return {
+                            correct: true,
+                            output: 'Success! 🎉\n\nTop 5 Orders by Sales:\n\n   Order ID    Order Date    Region      Sales    Order Quantity\n3  US-2016-156909  2016-07-16   Central    957.58             5\n1  CA-2016-138688  2016-11-12   West       731.94             3\n15 CA-2017-445566  2017-08-20   West       689.32             4\n23 US-2015-778899  2015-11-30   South      654.87             3\n31 CA-2016-334455  2016-05-12   Central    598.76             2',
+                            message: 'Perfect! You sorted by Sales in descending order.'
+                        };
+                    }
+                    break;
+                    
+                case '5_1':
+                    if (lowerCode.includes('[') && lowerCode.includes('life') && lowerCode.includes('42') && (lowerCode.includes('[0]') || lowerCode.includes('[-1]'))) {
+                        return {
+                            correct: true,
+                            output: 'Success! 🎉\n\nList created and accessed:\nFull list: [\'life\', 42, \'the universe\', 6, \'and\', 9]\nFirst element (index 0): life\nLast element (index -1): 9\nFirst two elements: [\'life\', 42]\n\nRemember: Python uses 0-based indexing!',
+                            message: 'Excellent! You created the list and accessed elements correctly.'
+                        };
+                    }
+                    break;
+                    
+                case '5_2':
+                    if (lowerCode.includes('[') && lowerCode.includes('for ') && lowerCode.includes(' in ') && lowerCode.includes('print')) {
+                        return {
+                            correct: true,
+                            output: 'Success! 🎉\n\nYour list created and printed:\nitem1\nitem2\nitem3\nitem4\n\nFor loop executed successfully!\nEach item was printed on a separate line.',
+                            message: 'Great! You created a list and used a for loop to print each item.'
+                        };
+                    }
+                    break;
+                    
+                case '5_3':
+                    if (lowerCode.includes('.values.tolist()') && lowerCode.includes('sales')) {
+                        return {
+                            correct: true,
+                            output: 'Success! 🎉\n\nDataFrame converted to list!\nFirst row: [\'CA-2016-152156\', \'2016-11-08\', \'South\', 261.96, 2]\n\nNow you can access data like:\n- sales_list[0] for first row\n- sales_list[0][2] for first row, third column (Region)\n- len(sales_list) for number of rows',
+                            message: 'Perfect! You converted the DataFrame to a list format.'
+                        };
+                    }
+                    break;
+                    
+                case '6_1':
+                    if (lowerCode.includes('print') && (lowerCode.includes('*') || lowerCode.includes('1.') || lowerCode.includes('bullet'))) {
+                        return {
+                            correct: true,
+                            output: 'Success! 🎉\n\n## My Favorite Python Features\n### Bulleted List:\n* Easy to learn\n* Powerful libraries\n* Great community\n\n### Numbered List:\n1. Data analysis with pandas\n2. Visualization with matplotlib\n3. Machine learning with scikit-learn\n\nGreat markdown formatting!',
+                            message: 'Excellent! You created both bulleted and numbered lists.'
+                        };
+                    }
+                    break;
+            }
+            
+            return {
+                correct: false,
+                output: 'Code executed, but not quite right yet.\n\nCheck the requirements and try again!\nUse the hint button if you need help.',
+                message: 'Check your syntax and make sure you follow the instructions.'
+            };
+        }
+
+        function showHint(exerciseId) {
+            const hints = {
+                '1_1': 'Use: import pandas as pd',
+                '2_1': 'Use: sales = pd.read_csv("data/sales.csv") then sales.head()',
+                '2_2': 'Use: sales.head(2) to show exactly 2 rows',
+                '2_3': 'Use: sales_subset = sales[["Order ID", "Order Quantity"]] then sales_subset.to_csv("data/sales_subset.csv")',
+                '2_4': 'Use: tips = pd.read_csv("data/tips.csv") then tips.head()',
+                '3_1': 'Use: sales.columns',
+                '3_2': 'Use: sales.describe()',
+                '3_3': 'Use: sales["Order Quantity"].mean() and sales["Order Quantity"].median()',
+                '3_4': 'Use: sales.shape',
+                '4_1': 'Use: sales.loc[sales["Region"] == "East"].head()',
+                '4_2': 'Use: len(sales.loc[sales["Region"] == "East"])',
+                '4_3': 'Use: sales.sort_values("Sales", ascending=False).head()',
+                '5_1': 'Create: items = ["life", 42, "the universe", 6, "and", 9] then print(items[0]) and print(items[-1])',
+                '5_2': 'Create a list with 4+ items, then use: for item in my_list: print(item)',
+                '5_3': 'Use: sales_list = sales.values.tolist() then sales_list[0]',
+                '6_1': 'Use print() statements to display markdown-style lists with * for bullets and numbers for ordered lists'
+            };
+            
+            const feedback = document.getElementById(`feedback${exerciseId}`);
+            feedback.className = 'feedback hint';
+            feedback.textContent = `💡 Hint: ${hints[exerciseId]}`;
+            feedback.style.display = 'block';
+        }
+
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Update navigation
+            document.querySelectorAll('.nav-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            currentSection = sectionId;
+        }
+
+        function checkQuiz(questionId, correctAnswer, points) {
+            const selectedOption = document.querySelector(`input[name="${questionId}"]:checked`);
+            const feedback = document.getElementById(`feedback${questionId}`);
+            
+            if (!selectedOption) {
+                feedback.className = 'feedback incorrect';
+                feedback.textContent = '❌ Please select an answer first.';
+                feedback.style.display = 'block';
+                return;
+            }
+            
+            if (selectedOption.value === correctAnswer) {
+                feedback.className = 'feedback correct';
+                feedback.textContent = '✅ Correct! Well done.';
+                addScore(points);
+            } else {
+                feedback.className = 'feedback incorrect';
+                feedback.textContent = '❌ Incorrect. Review the material and try again.';
+            }
+            feedback.style.display = 'block';
+        }
+
+        function addScore(points) {
+            totalScore = Math.min(totalScore + points, maxScore);
+            updateUI();
+            saveProgress();
+        }
+
+        function updateUI() {
+            document.getElementById('totalScore').textContent = totalScore;
+            document.getElementById('completedCount').textContent = completedExercises.length;
+            document.getElementById('totalExercises').textContent = Object.keys(exercises).length;
+            
+            const progressPercent = (totalScore / maxScore) * 100;
+            document.getElementById('progressFill').style.width = `${progressPercent}%`;
+        }
+
+        function updateCompletionStatus() {
+            const completionBadges = document.getElementById('completionBadges');
+            const sections = {
+                'imports': 'Import Packages',
+                'data-io': 'Data I/O', 
+                'data-understanding': 'Data Understanding',
+                'data-filtering': 'Data Filtering',
+                'lists-loops': 'Lists & Loops',
+                'markdown': 'Markdown & Media'
+            };
+
+            let badgesHTML = '';
+            Object.keys(sections).forEach(sectionId => {
+                const sectionExercises = Object.keys(exercises).filter(ex => exercises[ex].section === sectionId);
+                const completedInSection = sectionExercises.filter(ex => completedExercises.includes(ex)).length;
+                const totalInSection = sectionExercises.length;
+                
+                if (completedInSection === totalInSection && totalInSection > 0) {
+                    badgesHTML += `<span class="completion-badge">✅ ${sections[sectionId]} Complete</span>`;
+                } else {
+                    badgesHTML += `<span style="background: #6c757d; color: white; padding: 10px 20px; border-radius: 20px; margin: 5px; display: inline-block;">⏳ ${sections[sectionId]} (${completedInSection}/${totalInSection})</span>`;
+                }
+            });
+
+            completionBadges.innerHTML = badgesHTML;
+
+            // Check if all exercises completed
+            if (completedExercises.length === Object.keys(exercises).length) {
+                const statusDiv = document.getElementById('completionStatus');
+                statusDiv.innerHTML = `
+                    <h2 style="color: #28a745;">🎉 Congratulations!</h2>
+                    <p style="font-size: 1.2em; margin: 20px 0;">You have successfully completed the entire Python Bootcamp Lab!</p>
+                    <div style="font-size: 2em; margin: 20px 0;">🏆</div>
+                    <p><strong>Final Score: ${totalScore}/${maxScore} points</strong></p>
+                    ${badgesHTML}
+                `;
+            }
+        }
+
+        function saveProgress() {
+            const progress = {
+                totalScore,
+                completedExercises,
+                exercises: {},
+                timestamp: new Date().toISOString()
+            };
+            
+            Object.keys(editors).forEach(exerciseId => {
+                if (editors[exerciseId]) {
+                    progress.exercises[exerciseId] = {
+                        code: editors[exerciseId].getValue()
+                    };
+                }
+            });
+            
+            localStorage.setItem('pythonBootcampProgress', JSON.stringify(progress));
+        }
+
+        function generateCertificate() {
+            if (totalScore < 70) {
+                alert('Complete more exercises to earn your certificate! (Need 70+ points)');
+                return;
+            }
+            
+            const certificateArea = document.getElementById('certificateArea');
+            const currentDate = new Date().toLocaleDateString();
+            const completionPercentage = Math.round((totalScore / maxScore) * 100);
+            
+            certificateArea.innerHTML = `
+                <div style="border: 4px solid #667eea; padding: 40px; text-align: center; background: linear-gradient(135deg, #f8f9fa, #e9ecef); border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                    <div style="font-size: 3em; margin-bottom: 20px;">🏆</div>
+                    <h1 style="color: #667eea; font-size: 2.5em; margin-bottom: 20px;">Certificate of Completion</h1>
+                    <p style="font-size: 1.2em; margin: 20px 0; color: #666;">This certifies that</p>
+                    <div style="border-bottom: 3px solid #667eea; display: inline-block; padding: 10px 20px; margin: 20px;">
+                        <h2 style="color: #333; margin: 0;">Student Name</h2>
+                    </div>
+                    <p style="margin: 30px 0; font-size: 1.1em;">has successfully completed the</p>
+                    <h2 style="color: #764ba2; margin: 20px 0;">Interactive Python Bootcamp Lab</h2>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin: 30px 0; text-align: left; max-width: 500px; margin-left: auto; margin-right: auto;">
+                        <div>
+                            <strong>Final Score:</strong><br>${totalScore}/${maxScore} points (${completionPercentage}%)
+                        </div>
+                        <div>
+                            <strong>Completion Date:</strong><br>${currentDate}
+                        </div>
+                        <div>
+                            <strong>Exercises Completed:</strong><br>${completedExercises.length}/${Object.keys(exercises).length}
+                        </div>
+                        <div>
+                            <strong>Course Topics:</strong><br>Data Analysis, Python, Pandas
+                        </div>
+                    </div>
+                    
+                    <div style="margin: 30px 0; padding: 20px; background: rgba(102, 126, 234, 0.1); border-radius: 10px;">
+                        <h3 style="color: #667eea; margin-bottom: 15px;">Skills Demonstrated:</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: left;">
+                            <div>✅ Python Programming</div>
+                            <div>✅ Data Import/Export</div>
+                            <div>✅ Pandas Data Analysis</div>
+                            <div>✅ Data Filtering & Sorting</div>
+                            <div>✅ List Processing</div>
+                            <div>✅ Documentation with Markdown</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 40px;">
+                        <button class="btn" onclick="window.print()" style="background: #28a745; font-size: 16px; padding: 15px 30px;">
+                            🖨️ Print Certificate
+                        </button>
+                        <button class="btn" onclick="downloadCertificate()" style="background: #17a2b8; font-size: 16px; padding: 15px 30px;">
+                            💾 Download Certificate
+                        </button>
+                    </div>
+                    
+                    <div style="margin-top: 30px; font-size: 0.9em; color: #666;">
+                        <p>This certificate validates completion of hands-on Python programming exercises</p>
+                        <p>focusing on data analysis and pandas library proficiency.</p>
+                    </div>
+                </div>
+            `;
+            certificateArea.style.display = 'block';
+            
+            // Scroll to certificate
+            certificateArea.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function downloadCertificate() {
+            // Create a simple text version for download
+            const certificateText = `
+CERTIFICATE OF COMPLETION
+========================
+
+This certifies that STUDENT NAME has successfully completed the
+Interactive Python Bootcamp Lab
+
+Final Score: ${totalScore}/${maxScore} points
+Exercises Completed: ${completedExercises.length}/${Object.keys(exercises).length}
+Completion Date: ${new Date().toLocaleDateString()}
+
+Skills Demonstrated:
+✅ Python Programming
+✅ Data Import/Export  
+✅ Pandas Data Analysis
+✅ Data Filtering & Sorting
+✅ List Processing
+✅ Documentation with Markdown
+
+This certificate validates completion of hands-on Python programming 
+exercises focusing on data analysis and pandas library proficiency.
+            `;
+            
+            const blob = new Blob([certificateText], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Python_Bootcamp_Certificate.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up quiz option click handlers
+            document.querySelectorAll('.quiz-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const input = this.querySelector('input');
+                    input.checked = true;
+                    
+                    // Update visual selection
+                    const parent = this.closest('.quiz-options');
+                    parent.querySelectorAll('.quiz-option').forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                });
+            });
+            
+            updateUI();
+        });
+
+        // Auto-save progress every 30 seconds
+        setInterval(saveProgress, 30000);
+    </script>
+</body>
+</html>
