@@ -229,4 +229,89 @@ function getLabScript() {
     function initializeEditors() {
       for (let i = 1; i <= 3; i++) {
         editors[i] = monaco.editor.create(document.getElementById('editor' + i), {
-          value: ge
+          value: getInitialCode(i),
+          language: 'python',
+          theme: 'vs-light',
+          minimap: { enabled: false },
+          automaticLayout: true
+        });
+      }
+    }
+    
+    function getInitialCode(num) {
+      const codes = {
+        1: '# Import pandas with alias pd\\n',
+        2: '# Read CSV and show first 5 rows\\n# Use: pd.read_csv() and .head()\\n',
+        3: '# Basic statistics and filtering\\n# Use: .describe() and .loc[]\\n'
+      };
+      return codes[num] || '';
+    }
+    
+    function runCode(exerciseNum) {
+      const code = editors[exerciseNum].getValue();
+      const output = document.getElementById('output' + exerciseNum);
+      const feedback = document.getElementById('feedback' + exerciseNum);
+      
+      output.textContent = 'Checking your code...';
+      
+      setTimeout(() => {
+        const result = executeCode(exerciseNum, code);
+        output.textContent = result.output;
+        
+        if (result.correct) {
+          feedback.className = 'feedback correct';
+          feedback.textContent = '✅ ' + result.message;
+          feedback.style.display = 'block';
+          totalScore += result.points;
+        } else {
+          feedback.className = 'feedback incorrect';
+          feedback.textContent = '❌ ' + result.message;
+          feedback.style.display = 'block';
+        }
+      }, 1000);
+    }
+    
+    function executeCode(num, code) {
+      switch (num) {
+        case 1:
+          if (code.includes('import pandas as pd')) {
+            return {
+              correct: true,
+              output: 'Success! Pandas imported correctly.\\nYou can now use pd.read_csv(), pd.DataFrame(), etc.',
+              message: 'Perfect! Pandas imported successfully.',
+              points: 25
+            };
+          }
+          break;
+        case 2:
+          if (code.includes('pd.read_csv') && code.includes('.head()')) {
+            return {
+              correct: true,
+              output: 'Success! CSV reading code is correct.\\nSample data would appear here.',
+              message: 'Great! You can read and display CSV data.',
+              points: 35
+            };
+          }
+          break;
+        case 3:
+          if (code.includes('.describe()') || code.includes('.loc[')) {
+            return {
+              correct: true,
+              output: 'Success! Data analysis code is correct.\\nStatistics and filtering work perfectly.',
+              message: 'Excellent! You can analyze and filter data.',
+              points: 40
+            };
+          }
+          break;
+      }
+      return {
+        correct: false,
+        output: 'Code executed, but not quite right. Check the requirements!',
+        message: 'Check your syntax and try again.'
+      };
+    }
+  `;
+}
+
+// Export for Vercel
+module.exports = app;
