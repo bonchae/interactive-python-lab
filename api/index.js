@@ -271,45 +271,88 @@ function getLabScript() {
       }, 1000);
     }
     
-    function executeCode(num, code) {
-      switch (num) {
-        case 1:
-          if (code.includes('import pandas as pd')) {
-            return {
-              correct: true,
-              output: 'Success! Pandas imported correctly.\\nYou can now use pd.read_csv(), pd.DataFrame(), etc.',
-              message: 'Perfect! Pandas imported successfully.',
-              points: 25
-            };
-          }
-          break;
-        case 2:
-          if (code.includes('pd.read_csv') && code.includes('.head()')) {
-            return {
-              correct: true,
-              output: 'Success! CSV reading code is correct.\\nSample data would appear here.',
-              message: 'Great! You can read and display CSV data.',
-              points: 35
-            };
-          }
-          break;
-        case 3:
-          if (code.includes('.describe()') || code.includes('.loc[')) {
-            return {
-              correct: true,
-              output: 'Success! Data analysis code is correct.\\nStatistics and filtering work perfectly.',
-              message: 'Excellent! You can analyze and filter data.',
-              points: 40
-            };
-          }
-          break;
+function executeCode(num, code) {
+  // Remove comments and normalize whitespace
+  const cleanCode = code.replace(/#.*$/gm, '').replace(/\s+/g, ' ').trim().toLowerCase();
+  
+  switch (num) {
+    case 1:
+      // Check for proper pandas import
+      if (code.includes('import pandas as pd')) {
+        return {
+          correct: true,
+          output: 'Success! Pandas imported correctly.\\nYou can now use pd.read_csv(), pd.DataFrame(), etc.',
+          message: 'Perfect! Pandas imported successfully.',
+          points: 25
+        };
+      } else {
+        return {
+          correct: false,
+          output: 'Error: Pandas not imported correctly.\\nExpected: import pandas as pd',
+          message: 'Use: import pandas as pd'
+        };
       }
-      return {
-        correct: false,
-        output: 'Code executed, but not quite right. Check the requirements!',
-        message: 'Check your syntax and try again.'
-      };
-    }
+      
+    case 2:
+      // Check for proper CSV reading with both read_csv AND .head()
+      const hasReadCsv = cleanCode.includes('pd.read_csv(');
+      const hasHead = cleanCode.includes('.head()');
+      const hasProperSyntax = /pd\.read_csv\s*\(\s*['""][^'"]+['"]\s*\)/.test(code);
+      
+      if (hasReadCsv && hasHead && hasProperSyntax) {
+        return {
+          correct: true,
+          output: 'Success! CSV reading code is correct.\\n\\nExample output:\\n   Order ID    Region    Sales\\n0  CA-2016-152156  South     261.96\\n1  CA-2016-138688  West      731.94\\n2  US-2015-108966  East       14.62',
+          message: 'Great! You can read and display CSV data.',
+          points: 35
+        };
+      } else if (!hasReadCsv) {
+        return {
+          correct: false,
+          output: 'Error: Missing pd.read_csv()\\nYou need to use pd.read_csv("filename.csv")',
+          message: 'Missing pd.read_csv() - check your syntax'
+        };
+      } else if (!hasProperSyntax) {
+        return {
+          correct: false,
+          output: 'Error: Syntax error in pd.read_csv()\\nCorrect format: pd.read_csv("filename.csv")\\nYour code has: ' + code.match(/pd\.read[^(]*\([^)]*\)/)?.[0] || 'invalid syntax',
+          message: 'Check your pd.read_csv() syntax - needs quotes around filename'
+        };
+      } else if (!hasHead) {
+        return {
+          correct: false,
+          output: 'Error: Missing .head()\\nYou need to add .head() to display the first 5 rows',
+          message: 'Missing .head() method to display data'
+        };
+      }
+      break;
+      
+    case 3:
+      const hasDescribe = cleanCode.includes('.describe()');
+      const hasLoc = cleanCode.includes('.loc[');
+      
+      if (hasDescribe || hasLoc) {
+        return {
+          correct: true,
+          output: 'Success! Data analysis code is correct.\\n\\nExample .describe() output:\\n       Sales\\ncount  1000.0\\nmean   456.8\\nstd    312.4',
+          message: 'Excellent! You can analyze and filter data.',
+          points: 40
+        };
+      } else {
+        return {
+          correct: false,
+          output: 'Error: Missing data analysis methods\\nTry: data.describe() for statistics\\nOr: data.loc[condition] for filtering',
+          message: 'Use .describe() for statistics or .loc[] for filtering'
+        };
+      }
+  }
+  
+  return {
+    correct: false,
+    output: 'Code executed, but requirements not met. Check the instructions!',
+    message: 'Check your syntax and requirements.'
+        };
+      }
   `;
 }
 
