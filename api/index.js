@@ -294,37 +294,35 @@ function executeCode(num, code) {
       }
       
     case 2:
-      // Check for the key components more flexibly
-      const codeLines = code.split('\\n').map(line => line.trim()).filter(line => line && !line.startsWith('#'));
+      // Simple and robust validation
+      const hasReadCsv = code.includes('pd.read_csv');
+      const hasQuotes = (code.includes('"') || code.includes("'"));
+      const hasHead = code.includes('.head()');
       
-      // Look for pd.read_csv with any parameter in quotes
-      const hasReadCsvLine = codeLines.some(line => 
-        /pd\.read_csv\s*\(\s*["'].+["']\s*\)/.test(line)
-      );
-      
-      // Look for .head() call
-      const hasHeadLine = codeLines.some(line => 
-        /\.head\s*\(\s*\)/.test(line)
-      );
-      
-      if (hasReadCsvLine && hasHeadLine) {
+      if (hasReadCsv && hasQuotes && hasHead) {
         return {
           correct: true,
           output: 'Success! CSV reading code is correct.\\n\\nYour code properly:\\n1. Uses pd.read_csv() to load data\\n2. Uses .head() to display first 5 rows\\n\\nSample output:\\n   Order ID         Order Date Region    Sales  Order Quantity\\n0  CA-2016-152156  2016-11-08  South    261.96             2\\n1  CA-2016-138688  2016-11-12  West     731.94             3\\n2  US-2015-108966  2015-10-11  East      14.62             2',
           message: 'Perfect! You can read CSV data and display it correctly.',
           points: 35
         };
-      } else if (!hasReadCsvLine) {
+      } else if (!hasReadCsv) {
         return {
           correct: false,
-          output: 'Error: Missing or incorrect pd.read_csv()\\n\\nValid examples:\\n- pd.read_csv("filename.csv")\\n- pd.read_csv("https://example.com/data.csv")\\n- df = pd.read_csv("data.csv")\\n\\nMake sure to put the filename/URL in quotes!',
-          message: 'Need valid pd.read_csv() with quoted filename or URL'
+          output: 'Error: Missing pd.read_csv()\\nYou need to use pd.read_csv() to read the CSV file',
+          message: 'Missing pd.read_csv() function'
         };
-      } else if (!hasHeadLine) {
+      } else if (!hasQuotes) {
         return {
           correct: false,
-          output: 'Error: Missing .head()\\n\\nYou need to display the data with .head()\\nExamples:\\n- df.head()\\n- pd.read_csv("file.csv").head()',
-          message: 'Missing .head() to display the first 5 rows'
+          output: 'Error: Missing quotes around filename/URL\\nExample: pd.read_csv("filename.csv")',
+          message: 'Put quotes around the filename or URL'
+        };
+      } else if (!hasHead) {
+        return {
+          correct: false,
+          output: 'Error: Missing .head()\\nYou need .head() to display the first 5 rows',
+          message: 'Missing .head() method'
         };
       }
       break;
