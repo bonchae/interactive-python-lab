@@ -1,0 +1,17 @@
+{
+  "name": "interactive-python-bootcamp",
+  "version": "1.0.0",
+  "description": "Interactive Python Bootcamp Lab with Canvas LTI integration",
+  "main": "api/index.js",
+  "scripts": {
+    "start": "node api/index.js",
+    "dev": "node api/index.js",
+    "build": "echo 'Build complete'"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
